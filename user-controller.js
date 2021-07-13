@@ -45,6 +45,35 @@ class UserController {
         });
     }
 
+    changePassword(req, res) {
+
+        let userId = req.params.id;
+        let { password} = req.body;
+
+       userDAO.changePassword(userId, password).then(result => {
+            let data = result;            
+            res.json(data);
+        }).catch(err => {            
+            console.error("Error", err.message);
+            res.json({errorMessage: err.message});
+        });
+    }
+
+    updateUserDetails(req, res) {
+
+        let userId = req.params.id;
+        let user = req.body;        
+        user._id = userId;
+
+       userDAO.update(user).then(result => {
+            let data = result;            
+            res.json(data);
+        }).catch(err => {            
+            console.error("Error", err.message);
+            res.json({errorMessage: err.message});
+        });
+    }
+
     delete(req,res){
         let userId = req.params.id;
         userDAO.delete(userId).then(result => {

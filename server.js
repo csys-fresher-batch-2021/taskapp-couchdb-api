@@ -14,6 +14,8 @@ const userController = new UserController();
 app.get('/api/v1/users', userController.getAllUsers);
 app.get('/api/v1/users/:id', userController.findOne);
 app.post('/api/v1/users', userController.save);
+app.put('/api/v1/users/:id', userController.updateUserDetails);
+app.patch('/api/v1/users/:id', userController.changePassword);
 app.delete('/api/v1/users/:id', userController.delete);
 
 
