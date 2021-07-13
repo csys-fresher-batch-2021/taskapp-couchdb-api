@@ -33,7 +33,8 @@ class UserDAO {
         let selector = {
             "selector": {
                 "role": role                
-            }
+            },
+            "fields":[ "_id","_rev", "name", "email", "role"]
         };
 
         const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
