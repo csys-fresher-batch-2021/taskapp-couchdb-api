@@ -99,7 +99,7 @@ class UserService {
             }
 
             //update - password            
-            actualRecord.password = user.password;
+            actualRecord.password = password;
 
             let result = await userDAO.update(actualRecord);
             return result.data;
