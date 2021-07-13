@@ -1,13 +1,13 @@
 const axios = require('axios');
 
-const { UserDAO } = require("./user-dao");
-const userDAO = new UserDAO();
+const { UserService } = require("./user-service");
+const userService = new UserService();
 class UserController {    
 
     getAllUsers(req, res) {
 
         
-        userDAO.getAllUsers().then(result => {
+        userService.getAllUsers().then(result => {
             let users = result;
             console.log(users);
             res.json(users);
@@ -22,7 +22,7 @@ class UserController {
 
         let userId = req.params.id;
         console.log(userId);
-        userDAO.findOne(userId).then(result => {
+        userService.findOne(userId).then(result => {
             let user = result;
             console.log(user);            
             res.json(user);
@@ -36,7 +36,7 @@ class UserController {
     save(req, res) {
 
         let user = req.body;
-       userDAO.save(user).then(result => {
+        userService.save(user).then(result => {
             let data = result;            
             res.json(data);
         }).catch(err => {            
@@ -50,7 +50,7 @@ class UserController {
         let userId = req.params.id;
         let { password} = req.body;
 
-       userDAO.changePassword(userId, password).then(result => {
+        userService.changePassword(userId, password).then(result => {
             let data = result;            
             res.json(data);
         }).catch(err => {            
@@ -65,7 +65,7 @@ class UserController {
         let user = req.body;        
         user._id = userId;
 
-       userDAO.update(user).then(result => {
+        userService.update(user).then(result => {
             let data = result;            
             res.json(data);
         }).catch(err => {            
@@ -76,7 +76,7 @@ class UserController {
 
     delete(req,res){
         let userId = req.params.id;
-        userDAO.delete(userId).then(result => {
+        userService.delete(userId).then(result => {
             let data = result;            
             res.json(data);
         }).catch(err => {            
