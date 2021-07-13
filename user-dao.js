@@ -27,6 +27,36 @@ class UserDAO {
         };
     }
 
+    async searchByRole(role){
+
+
+        let selector = {
+            "selector": {
+                "role": role                
+            }
+        };
+
+        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
+        console.log(apiKey);
+        const headers  =  {
+            'Authorization': `Basic ${apiKey}`
+        };
+        console.log(headers);
+
+        const url = process.env.DB_URL + '/users/_find';
+        console.log(url);
+        try{
+            
+            let result = await axios.post(url,selector, { headers: headers });
+            let rows = result.data.docs;
+            return rows;        
+        }
+        catch(err){
+            this.handleErrorMessage(err);
+        };
+
+    }
+
     async findOne(userId) {
 
        

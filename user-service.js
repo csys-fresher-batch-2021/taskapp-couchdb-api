@@ -12,6 +12,11 @@ class UserService {
         return userDAO.getAllUsers();
     }
 
+    async searchUsers(role) {
+
+        return userDAO.searchByRole(role);
+    }
+
     async findOne(userId) {
 
         try{
@@ -33,7 +38,7 @@ class UserService {
         try{
            let exists  =  false; //await userDAO.findOne();
 
-           if(!exists){
+           if(exists){
                throw new Error("Email Already Registered");
            }
            

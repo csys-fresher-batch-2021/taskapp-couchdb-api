@@ -18,6 +18,22 @@ class UserController {
         });
     }
 
+    searchByRole(req, res) {
+
+        let role = req.query.role;
+        console.log("Role:" + role);
+        
+        userService.searchUsers(role).then(result => {
+            let users = result;
+            console.log(users);
+            res.json(users);
+        }).catch(err => {
+            console.log(err);
+            console.error("Error", err.message);
+            res.json({ erorMessage:  err.message });
+        });
+    }
+
     findOne(req, res) {
 
         let userId = req.params.id;
