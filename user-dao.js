@@ -1,9 +1,11 @@
 const axios = require('axios');
 
+
+
 class UserDAO {
     
 
-    getAllUsers(req, res) {
+    async getAllUsers() {
 
         const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
         console.log(apiKey);
@@ -14,21 +16,21 @@ class UserDAO {
 
         const url = process.env.DB_URL + '/users/_all_docs?include_docs=true';
         console.log(url);
-        axios.get(url, { headers: headers }).then(result => {
-            let data = result.data;
-            console.log(data);
-            let rows = data.rows.filter(obj => !obj.id.includes("_design")).map(obj => obj.doc);
-            res.json(rows);
-        }).catch(err => {
-            console.log(err);
-            console.error("Error", err.response);
-            res.json(res.response);
-        });
+        try{
+            
+            let result = await axios.get(url, { headers: headers });
+            let rows = result.data.rows.filter(obj => !obj.id.includes("_design")).map(obj => obj.doc);
+            return rows;        
+        }
+        catch(err){
+            console.error(err.response);
+            throw new Error(err.response);
+        };
     }
 
-    findOne(req, res) {
+    async findOne(userId) {
 
-        let userId = req.params.id;
+       
         console.log(userId);
 
         const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
@@ -40,21 +42,20 @@ class UserDAO {
 
         const url = process.env.DB_URL + '/users/' + userId;
         console.log(url);
-        axios.get(url, { headers: headers }).then(result => {
-            let data = result.data;
-            console.log(data);
-            let rows = data;
-            res.json(rows);
-        }).catch(err => {
-            console.log(err);
-            console.error("Error", err.response);
-            res.json(res.response);
-        });
+
+        try{
+            let result = await axios.get(url, { headers: headers });
+            return result.data;
+        }
+        catch(err){
+            console.error(err.response.data);
+            throw new Error(err.response.data);
+        }
+
     }
 
-    save(req, res) {
+    async save(user) {
 
-        let user = req.body;
         console.log(user);
 
         const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
@@ -66,19 +67,22 @@ class UserDAO {
 
         const url = process.env.DB_URL + '/users';
         console.log(url);
-        axios.post(url,user, { headers: headers }).then(result => {
-            let data = result.data;            
-            res.json(data);
-        }).catch(err => {
-            console.log(err);
-            console.error("Error", err.response);
-            res.json(res.response);
-        });
+        try{
+            let result = await axios.post(url,user, { headers: headers });
+            return result.data;
+
+        }
+        catch(err) {
+            console.log(err.response.data);         
+            throw new Error(err.message.data);
+         
+        };
     }
 
-    delete(req,res){
-        let userId = req.params.id;
-        let revId = req.query.rev;
+    async delete(userId){
+
+        let user = await this.findOne(userId);        
+        let revId = user._rev;
 
         const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
         console.log(apiKey);
@@ -89,14 +93,15 @@ class UserDAO {
 
         const url = process.env.DB_URL + '/users/'+ userId + "?rev=" + revId;
         console.log(url);
-        axios.delete(url, { headers: headers }).then(result => {
-            let data = result.data;            
-            res.json(data);
-        }).catch(err => {
-            console.log(err);
+        try{
+        let result = await axios.delete(url, { headers: headers });
+        return result.data;
+
+        }catch(err ){
+            console.log(err.response.data);
             console.error("Error", err.response);
-            res.json(res.response);
-        });
+            throw new Error(err.response.data);
+        }
     }
 }
 exports.UserDAO = UserDAO;
