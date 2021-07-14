@@ -1,190 +1,104 @@
-const axios = require('axios');
-
-
+const { HttpClient } = require("./http-client");
+const dotenv = require('dotenv');
+dotenv.config();
+const httpClient = new HttpClient();
 
 class UserDAO {
+  DB_URL = null;
+  constructor() {
+    this.DB_URL = process.env.DB_URL;
+    console.log("DB_URL=" , this.DB_URL);
+  }
+
+  async getAllUsers() {
+    const url = this.DB_URL + "/usssers/_all_docs?include_docs=true";    
+    try {
+      let result = await httpClient.get(url);
+      console.log("Result", result);
+      let rows = result.data.rows
+        .filter((obj) => !obj.id.includes("_design"))
+        .map((obj) => obj.doc);
+      return rows;
+    } catch (err) {
+      this.handleErrorMessage(err);
+    }
+  }
+
+  async searchByRole(role) {
+    let query = {
+      selector: {
+        role: role,
+      },
+      fields: ["_id", "_rev", "name", "email", "role"],
+    };
+
+    const url = this.DB_URL + "/users/_find";    
+    try {
+      let result = await httpClient.post(url, query);
+      let rows = result.data.docs;
+      return rows;
+    } catch (err) {
+      this.handleErrorMessage(err);
+    }
+  }
+
+  async findOne(userId) {
+    const url = this.DB_URL + "/users/" + userId;    
+    try {
+      let result = await httpClient.get(url);
+      return result.data;
+    } catch (err) {
+      this.handleErrorMessage(err);
+    }
+  }
+
+  handleErrorMessage(err) {
+    console.error(err);
+    let response = err.response.data;
+    let errorMessage = err.response.data.error;
+    console.log("errorMessage:" + errorMessage);
+    if (response.error == "not_found" ) {
+      if (response.reason == "Database does not exist."){
+        throw new Error("Database not found");
+      }
+      else{
+        throw new Error("Data not found");
+      }
+    } else {
+      throw new Error(errorMessage);
+    }
+  }
+
+  async save(user) {    
+    const url = this.DB_URL + "/users";    
+    try {
+      let result = await httpClient.post(url, user);
+      console.log(result);
+      return result.data;
+    } catch (err) {
+      this.handleErrorMessage(err);
+    }
+  }
+
+  async delete(user) {
+    const url = this.DB_URL + "/users/" + user._id + "?rev=" + user._rev;
     
-
-    async getAllUsers() {
-
-        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
-        console.log(apiKey);
-        const headers  =  {
-            'Authorization': `Basic ${apiKey}`
-        };
-        console.log(headers);
-
-        const url = process.env.DB_URL + '/users/_all_docs?include_docs=true';
-        console.log(url);
-        try{
-            
-            let result = await axios.get(url, { headers: headers });
-            let rows = result.data.rows.filter(obj => !obj.id.includes("_design")).map(obj => obj.doc);
-            return rows;        
-        }
-        catch(err){
-            this.handleErrorMessage(err);
-        };
+    try {
+      let result = await httpClient.delete(url);
+      return result.data;
+    } catch (err) {
+      this.handleErrorMessage(err);
     }
+  }
 
-    async searchByRole(role){
-
-
-        let selector = {
-            "selector": {
-                "role": role                
-            },
-            "fields":[ "_id","_rev", "name", "email", "role"]
-        };
-
-        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
-        console.log(apiKey);
-        const headers  =  {
-            'Authorization': `Basic ${apiKey}`
-        };
-        console.log(headers);
-
-        const url = process.env.DB_URL + '/users/_find';
-        console.log(url);
-        try{
-            
-            let result = await axios.post(url,selector, { headers: headers });
-            let rows = result.data.docs;
-            return rows;        
-        }
-        catch(err){
-            this.handleErrorMessage(err);
-        };
-
+  async update(user) {
+    const url = this.DB_URL + "/users/" + user._id + "?rev=" + user._rev;    
+    try {
+      let result = await httpClient.put(url, user);
+      return result.data;
+    } catch (err) {
+      this.handleErrorMessage(err);
     }
-
-    async findOne(userId) {
-
-       
-        console.log(userId);
-
-        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
-        console.log(apiKey);
-        const headers  =  {
-            'Authorization': `Basic ${apiKey}`
-        };
-        console.log(headers);
-
-        const url = process.env.DB_URL + '/users/' + userId;
-        console.log(url);
-
-        try{
-            let result = await axios.get(url, { headers: headers });
-            return result.data;
-        }
-        catch(err){
-            
-            this.handleErrorMessage(err);
-        }
-
-    }
-
-    handleErrorMessage(err){
-        console.error(err.response.data);
-        let errorMessage = err.response.data.error;
-        console.log("errorMessage:" + errorMessage);
-        if (errorMessage == 'not_found'){
-            throw new Error("Id not found")
-        }
-        else{
-            throw new Error(errorMessage);
-        }
-    }
-
-    async save(user) {
-
-        console.log(user);
-
-        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
-        console.log(apiKey);
-        const headers  =  {
-            'Authorization': `Basic ${apiKey}`
-        };
-        console.log(headers);
-
-        const url = process.env.DB_URL + '/users';
-        console.log(url);
-        try{
-            let result = await axios.post(url,user, { headers: headers });
-            return result.data;
-
-        }
-        catch(err) {            
-            this.handleErrorMessage(err);         
-        };
-    }
-
-    async delete(user){
-
-
-        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
-        console.log(apiKey);
-        const headers  =  {
-            'Authorization': `Basic ${apiKey}`
-        };
-        console.log(headers);
-
-        const url = process.env.DB_URL + '/users/'+ user._id + "?rev=" + user._rev;
-        console.log(url);
-        try{
-        let result = await axios.delete(url, { headers: headers });
-        return result.data;
-
-        }catch(err ){
-            this.handleErrorMessage(err);
-        }
-    }
-
-    async update(user){
-
-        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
-        console.log(apiKey);
-        const headers  =  {
-            'Authorization': `Basic ${apiKey}`
-        };
-        console.log(headers);
-
-        const url = process.env.DB_URL + '/users/'+ user._id + "?rev=" + user._rev;
-        console.log(url);
-        try{
-        let result = await axios.put(url, actualRecord, { headers: headers });
-        return result.data;
-
-        }catch(err ){
-            this.handleErrorMessage(err);
-        }
-    }
-
-    /*
-    async changePassword(userId, password){
-
-        let user = await this.findOne(userId);        
-        let revId = user._rev;
-
-        //update password
-        user.password = password;
-
-        const apiKey = Buffer.from(process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD).toString('base64');
-        console.log(apiKey);
-        const headers  =  {
-            'Authorization': `Basic ${apiKey}`
-        };
-        console.log(headers);
-
-        const url = process.env.DB_URL + '/users/'+ userId + "?rev=" + revId;
-        console.log(url);
-        try{
-        let result = await axios.put(url, user, { headers: headers });
-        return result.data;
-
-        }catch(err ){
-            this.handleErrorMessage(err);
-        }
-    }*/
+  }
 }
 exports.UserDAO = UserDAO;

@@ -1,20 +1,17 @@
-const axios = require('axios');
-
 const { UserService } = require("./user-service");
 const userService = new UserService();
 class UserController {    
 
     getAllUsers(req, res) {
-
         
         userService.getAllUsers().then(result => {
             let users = result;
             console.log(users);
-            res.json(users);
+            res.status(200).json(users);
         }).catch(err => {
             console.log(err);
             console.error("Error", err.message);
-            res.json({ erorMessage:  err.message });
+            res.status(500).json({ erorMessage:  err.message });
         });
     }
 
@@ -30,7 +27,7 @@ class UserController {
         }).catch(err => {
             console.log(err);
             console.error("Error", err.message);
-            res.json({ erorMessage:  err.message });
+            res.status(500).json({ erorMessage:  err.message });
         });
     }
 
@@ -41,11 +38,11 @@ class UserController {
         userService.findOne(userId).then(result => {
             let user = result;
             console.log(user);            
-            res.json(user);
+            res.status(200).json(user);
         }).catch(err => {
             console.log(err);
             console.error("Error", err.message);
-            res.json({errorMessage: err.message});
+            res.status(404).json({errorMessage: err.message});
         });
     }
 
@@ -83,10 +80,10 @@ class UserController {
 
         userService.update(user).then(result => {
             let data = result;            
-            res.json(data);
+            res.status(200).json(data);
         }).catch(err => {            
             console.error("Error", err.message);
-            res.json({errorMessage: err.message});
+            res.status(500).json({errorMessage: err.message});
         });
     }
 
@@ -94,10 +91,10 @@ class UserController {
         let userId = req.params.id;
         userService.delete(userId).then(result => {
             let data = result;            
-            res.json(data);
+            res.status(200).json(data);
         }).catch(err => {            
             console.error("Error", err.message);
-            res.json({errorMessage: err.message});
+            res.status(500).json({errorMessage: err.message});
         });
     }
 }
