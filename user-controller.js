@@ -51,10 +51,10 @@ class UserController {
         let user = req.body;
         userService.save(user).then(result => {
             let data = result;            
-            res.json(data);
+            res.status(201).json(data);
         }).catch(err => {            
             console.error("Error", err.message);
-            res.json({errorMessage: err.message});
+            res.status(500).json({errorMessage: err.message});
         });
     }
 
@@ -65,7 +65,7 @@ class UserController {
 
         userService.changePassword(userId, password).then(result => {
             let data = result;            
-            res.json(data);
+            res.status(200).json(data);
         }).catch(err => {            
             console.error("Error", err.message);
             res.json({errorMessage: err.message});
